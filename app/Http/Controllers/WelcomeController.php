@@ -12,6 +12,7 @@ class WelcomeController extends Controller
     {
         return Inertia::render('Welcome', [
             'githubUrl' => 'https://github.com/dev4rweb/demo-booking',
+            'seo' => page_seo(__('app.welcome.meta_title'), __('app.welcome.meta_description')),
             'demoTenants' => Tenant::query()
                 ->whereIn('slug', ['luna-beauty', 'peak-fitness'])
                 ->get(['name', 'slug'])

@@ -36,3 +36,18 @@ if (! function_exists('telegram_enabled')) {
         return $token !== '' && $token !== 'your_bot_token_here';
     }
 }
+
+if (! function_exists('page_seo')) {
+    /**
+     * Per-page title and description for <title>, meta, Open Graph and Twitter.
+     *
+     * @return array{title: string, description: string}
+     */
+    function page_seo(?string $title = null, ?string $description = null): array
+    {
+        return [
+            'title' => $title ?: (string) __('app.meta.title'),
+            'description' => $description ?: (string) __('app.meta.description'),
+        ];
+    }
+}

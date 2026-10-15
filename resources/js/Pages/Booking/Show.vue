@@ -5,8 +5,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import LocaleSwitcher from '@/Components/LocaleSwitcher.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import SeoHead from '@/Components/SeoHead.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from '@/composables/useI18n';
 
@@ -90,7 +91,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head :title="business.name" />
+    <SeoHead />
     <div class="min-h-screen">
         <header class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-5">
             <Link :href="locRoute('welcome')" class="flex items-center gap-2">
@@ -157,7 +158,8 @@ const submit = () => {
                     </div>
                     <div>
                         <InputLabel for="guest-phone" :value="t('common.phone')" />
-                        <TextInput id="guest-phone" v-model="form.phone" class="mt-1 block w-full" required autocomplete="tel" />
+                        <TextInput id="guest-phone" v-model="form.phone" class="mt-1 block w-full" required autocomplete="tel" :placeholder="t('booking.phone_hint')" />
+                        <p class="mt-1 text-xs leading-5 text-muted">{{ t('booking.phone_hint') }}</p>
                         <InputError class="mt-1" :message="form.errors.phone" />
                     </div>
                     <div>

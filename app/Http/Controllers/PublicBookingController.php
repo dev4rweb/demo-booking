@@ -32,6 +32,10 @@ class PublicBookingController extends Controller
             ->get(['id', 'name']);
 
         return Inertia::render('Booking/Show', [
+            'seo' => page_seo(
+                $tenant->name,
+                __('app.booking.meta_description', ['name' => $tenant->name]),
+            ),
             'business' => [
                 'name' => $tenant->name,
                 'slug' => $tenant->slug,
@@ -115,6 +119,10 @@ class PublicBookingController extends Controller
         $record = $tenant->bookings()->with(['service', 'staffMember', 'client'])->findOrFail($booking);
 
         return Inertia::render('Booking/Success', [
+            'seo' => page_seo(
+                __('app.booking.success_title'),
+                __('app.booking.meta_description', ['name' => $tenant->name]),
+            ),
             'business' => ['name' => $tenant->name, 'slug' => $tenant->slug],
             'booking' => [
                 'id' => $record->id,

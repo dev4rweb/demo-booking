@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TelegramWebhookController;
 use Illuminate\Support\Facades\Route;
 
 $locales = implode('|', config('localization.supported'));
 
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])->name('telegram.webhook');
 
 require __DIR__.'/app.php';

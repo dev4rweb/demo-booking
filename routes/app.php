@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BookingController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/how-to', [GuideController::class, 'index'])->name('guide');
 
 Route::get('/b/{slug}', [PublicBookingController::class, 'show'])->name('booking.show');
