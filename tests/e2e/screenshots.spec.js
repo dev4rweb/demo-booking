@@ -47,6 +47,12 @@ for (const theme of themes) {
         await shot(page, `landing-${theme}-${width}`);
       });
 
+      test('about-en', async ({ page }) => {
+        await page.goto('/about');
+        await page.waitForSelector('h1');
+        await shot(page, `about-en-${theme}-${width}`);
+      });
+
       test('howto-en', async ({ page }) => {
         await page.goto('/how-to');
         await page.waitForSelector('h1');

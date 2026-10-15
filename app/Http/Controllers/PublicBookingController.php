@@ -16,9 +16,9 @@ use Inertia\Response;
 
 class PublicBookingController extends Controller
 {
-    public function show(string $slug): Response
+    public function show(Request $request): Response
     {
-        $tenant = $this->tenant($slug);
+        $tenant = $this->tenant($this->slug($request));
 
         $services = $tenant->services()
             ->where('is_active', true)
@@ -32,6 +32,10 @@ class PublicBookingController extends Controller
             ->get(['id', 'name']);
 
         return Inertia::render('Booking/Show', [
+            'seo' => page_seo(
+                $tenant->name,
+                __('app.booking.meta_description', ['name' => $tenant->name]),
+            ),
             'business' => [
                 'name' => $tenant->name,
                 'slug' => $tenant->slug,
@@ -46,9 +50,9 @@ class PublicBookingController extends Controller
         ]);
     }
 
-    public function slots(Request $request, string $slug, AvailabilityService $availability): JsonResponse
+    public function slots(Request $request, AvailabilityService $availability): JsonResponse
     {
-        $tenant = $this->tenant($slug);
+        $tenant = $this->tenant($this->slug($request));
 
         $data = $request->validate([
             'service_id' => ['required', 'integer'],
@@ -76,9 +80,9 @@ class PublicBookingController extends Controller
         return response()->json(['slots' => $slots]);
     }
 
-    public function store(Request $request, string $slug, BookingService $bookings): RedirectResponse
+    public function store(Request $request, BookingService $bookings): RedirectResponse
     {
-        $tenant = $this->tenant($slug);
+        $tenant = $this->tenant($this->slug($request));
 
         $data = $request->validate([
             'service_id' => ['required', 'integer'],
@@ -109,12 +113,16 @@ class PublicBookingController extends Controller
             ->with('success', __('app.booking.confirmed'));
     }
 
-    public function success(string $slug, int $booking): Response
+    public function success(Request $request): Response
     {
-        $tenant = $this->tenant($slug);
-        $record = $tenant->bookings()->with(['service', 'staffMember', 'client'])->findOrFail($booking);
+        $tenant = $this->tenant($this->slug($request));
+        $record = $tenant->bookings()->with(['service', 'staffMember', 'client'])->findOrFail((int) $request->route('booking'));
 
         return Inertia::render('Booking/Success', [
+            'seo' => page_seo(
+                __('app.booking.success_title'),
+                __('app.booking.meta_description', ['name' => $tenant->name]),
+            ),
             'business' => ['name' => $tenant->name, 'slug' => $tenant->slug],
             'booking' => [
                 'id' => $record->id,
@@ -130,6 +138,11 @@ class PublicBookingController extends Controller
                 ),
             ],
         ]);
+    }
+
+    private function slug(Request $request): string
+    {
+        return (string) $request->route('slug');
     }
 
     private function tenant(string $slug): Tenant

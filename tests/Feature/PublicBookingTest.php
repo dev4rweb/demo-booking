@@ -9,6 +9,13 @@ test('public booking page is reachable by slug', function () {
     $this->get('/b/'.$studio['tenant']->slug)
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('Booking/Show'));
+
+    $this->get('/fr/b/'.$studio['tenant']->slug)
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Booking/Show')
+            ->where('locale', 'fr')
+        );
 });
 
 test('guest can confirm a booking and receive a manage token', function () {

@@ -1,8 +1,7 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import LocaleSwitcher from '@/Components/LocaleSwitcher.vue';
-import ThemeToggle from '@/Components/ThemeToggle.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import PublicHeader from '@/Components/PublicHeader.vue';
+import SeoHead from '@/Components/SeoHead.vue';
+import { Link } from '@inertiajs/vue3';
 import { useI18n } from '@/composables/useI18n';
 
 defineProps({
@@ -15,21 +14,10 @@ const stack = ['Laravel 12', 'Vue 3', 'Inertia.js', 'Tailwind CSS', 'Cashier / S
 </script>
 
 <template>
-    <Head :title="t('welcome.title')" />
+    <SeoHead />
 
     <div class="min-h-screen">
-        <header class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-5 sm:px-6">
-            <Link :href="locRoute('welcome')" class="flex items-center gap-2">
-                <ApplicationLogo class="h-9 w-9" />
-                <span class="text-sm font-semibold tracking-tight">{{ t('app_name') }}</span>
-            </Link>
-            <div class="flex items-center gap-2">
-                <Link :href="locRoute('guide')" class="hidden rounded-full px-3 py-2 text-sm text-muted transition hover:text-ink sm:inline">{{ t('nav.guide') }}</Link>
-                <Link :href="locRoute('login')" class="hidden rounded-full px-3 py-2 text-sm text-muted transition hover:text-ink sm:inline">{{ t('nav.login') }}</Link>
-                <ThemeToggle />
-                <LocaleSwitcher />
-            </div>
-        </header>
+        <PublicHeader />
 
         <main class="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
             <section class="mx-auto max-w-3xl py-8 text-center sm:py-14">
@@ -51,6 +39,10 @@ const stack = ['Laravel 12', 'Vue 3', 'Inertia.js', 'Tailwind CSS', 'Cashier / S
             </section>
 
             <section class="mx-auto mt-6 grid max-w-3xl gap-4 sm:grid-cols-2">
+                <Link :href="locRoute('about')" class="soft-ring surface-card block p-6 text-center sm:col-span-2">
+                    <h3 class="text-xl font-semibold text-ink">{{ t('welcome.product') }}</h3>
+                    <p class="mt-2 text-sm text-muted">{{ t('welcome.product_hint') }}</p>
+                </Link>
                 <Link :href="locRoute('login')" class="soft-ring surface-card block p-6 text-center">
                     <h3 class="text-xl font-semibold text-ink">{{ t('welcome.owner_panel') }}</h3>
                     <p class="mt-2 text-sm text-muted">{{ t('welcome.owner_panel_hint') }}</p>

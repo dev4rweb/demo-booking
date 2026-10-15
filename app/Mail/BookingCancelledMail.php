@@ -14,22 +14,36 @@ class BookingCancelledMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Booking $booking) {}
+    public function __construct(public Booking $booking)
+    {
+        $this->locale($booking->locale ?: config('app.fallback_locale'));
+    }
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Booking cancelled — '.$this->booking->tenant->name);
+        $view = BookingMailView::extras($this->booking);
+
+        return BookingMailView::envelope(
+            trans('mail.cancelled.subject', ['business' => $view['business']], $view['locale']),
+        );
     }
 
     public function content(): Content
     {
-        $starts = $this->booking->starts_at->timezone($this->booking->timezone);
+        $view = BookingMailView::extras($this->booking);
+        $locale = $view['locale'];
 
         return new Content(
-            markdown: 'emails.booking-cancelled',
+            html: 'emails.booking-cancelled',
             with: [
-                'booking' => $this->booking,
-                'when' => $starts->format('D, M j Y H:i'),
+                ...$view,
+                'title' => trans('mail.cancelled.title', [], $locale),
+                'hello' => trans('mail.cancelled.hello', ['name' => $view['client']], $locale),
+                'body' => trans('mail.cancelled.body', [
+                    'business' => $view['business'],
+                    'when' => $view['when'],
+                ], $locale),
+                'thanks' => trans('mail.cancelled.thanks', [], $locale),
             ],
         );
     }

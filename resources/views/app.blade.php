@@ -6,11 +6,11 @@
         <meta name="theme-color" content="#0A0C10">
         <meta name="color-scheme" content="dark light">
 
-        <title inertia>{{ config('app.name', 'Bookly') }}</title>
+        <title inertia>{{ $page['props']['seo']['title'] ?? config('app.name', 'Bookly') }}</title>
 
         @php
-            $ogTitle = __('app.meta.title');
-            $ogDescription = __('app.meta.description');
+            $ogTitle = $page['props']['seo']['title'] ?? __('app.meta.title');
+            $ogDescription = $page['props']['seo']['description'] ?? __('app.meta.description');
             $ogSiteName = __('app.meta.site_name');
             $ogImage = 'https://demo-booking.dev4rweb.com/og-image.jpg';
             $ogUrl = url()->current();
@@ -23,6 +23,7 @@
         <meta property="og:image:height" content="630">
         <meta property="og:url" content="{{ $ogUrl }}">
         <meta property="og:type" content="website">
+        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
         <meta property="og:site_name" content="{{ $ogSiteName }}">
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $ogTitle }}">

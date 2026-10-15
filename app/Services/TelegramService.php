@@ -43,4 +43,35 @@ class TelegramService
 
         return null;
     }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function setWebhook(?string $url = null): ?array
+    {
+        if (! $this->enabled()) {
+            return null;
+        }
+
+        $token = (string) config('services.telegram.bot_token');
+        $endpoint = $url ?: rtrim((string) config('app.url'), '/').'/telegram/webhook';
+        $secret = (string) config('services.telegram.webhook_secret');
+
+        $payload = ['url' => $endpoint];
+
+        if ($secret !== '') {
+            $payload['secret_token'] = $secret;
+        }
+
+        $response = Http::post("https://api.telegram.org/bot{$token}/setWebhook", $payload);
+
+        if (! $response->successful()) {
+            Log::warning('Telegram setWebhook failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
+
+        return $response->json();
+    }
 }

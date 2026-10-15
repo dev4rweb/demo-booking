@@ -64,7 +64,17 @@ Cron (once per minute):
 
 Queue is `sync` by default. If you switch to `database`, the scheduler runs `queue:work --stop-when-empty`.
 
-Stripe and Telegram are optional: empty `STRIPE_KEY` / `STRIPE_SECRET` shows demo mode; empty `TELEGRAM_BOT_TOKEN` is a no-op.
+Stripe is optional: empty `STRIPE_KEY` / `STRIPE_SECRET` shows demo mode (no real charges).
+
+Mail uses Hostinger SMTP (`MAIL_MAILER=smtp`, `MAIL_HOST=smtp.hostinger.com`, `MAIL_PORT=465`, `MAIL_SCHEME=smtps`, from `noreply@dev4rweb.com`). `QUEUE_CONNECTION=sync` sends immediately.
+
+Telegram is one platform bot. Empty `TELEGRAM_BOT_TOKEN` / `TELEGRAM_BOT_USERNAME` hides Connect Telegram. After deploy:
+
+```bash
+/opt/alt/php83/usr/bin/php artisan telegram:set-webhook
+```
+
+Webhook: `https://demo-booking.dev4rweb.com/telegram/webhook` (header `X-Telegram-Bot-Api-Secret-Token`).
 
 ## Tests
 

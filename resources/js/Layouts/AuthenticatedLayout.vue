@@ -17,6 +17,7 @@ const showingNavigationDropdown = ref(false);
 const role = computed(() => page.props.auth?.user?.role);
 const isOwner = computed(() => ['owner', 'platform_admin'].includes(role.value));
 const isAdmin = computed(() => role.value === 'platform_admin');
+const canTelegram = computed(() => ['owner', 'staff', 'platform_admin'].includes(role.value));
 const demoMode = computed(() => page.props.demoMode);
 </script>
 
@@ -55,7 +56,8 @@ const demoMode = computed(() => page.props.demoMode);
                             </template>
                             <template #content>
                                 <DropdownLink v-if="isOwner" :href="locRoute('billing.index')">{{ t('nav.billing') }}</DropdownLink>
-                                <DropdownLink v-if="isOwner" :href="locRoute('telegram.index')">{{ t('nav.telegram') }}</DropdownLink>
+                                <DropdownLink v-if="canTelegram" :href="locRoute('telegram.index')">{{ t('nav.telegram') }}</DropdownLink>
+                                <DropdownLink :href="locRoute('about')">{{ t('nav.about') }}</DropdownLink>
                                 <DropdownLink :href="locRoute('guide')">{{ t('nav.guide') }}</DropdownLink>
                                 <DropdownLink :href="locRoute('profile.edit')">{{ t('nav.profile') }}</DropdownLink>
                                 <DropdownLink :href="locRoute('logout')" method="post" as="button">{{ t('nav.logout') }}</DropdownLink>
@@ -83,8 +85,9 @@ const demoMode = computed(() => page.props.demoMode);
                     <ResponsiveNavLink v-if="isOwner" :href="locRoute('services.index')">{{ t('nav.services') }}</ResponsiveNavLink>
                     <ResponsiveNavLink v-if="isOwner" :href="locRoute('staff.index')">{{ t('nav.staff') }}</ResponsiveNavLink>
                     <ResponsiveNavLink v-if="isOwner" :href="locRoute('billing.index')">{{ t('nav.billing') }}</ResponsiveNavLink>
-                    <ResponsiveNavLink v-if="isOwner" :href="locRoute('telegram.index')">{{ t('nav.telegram') }}</ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="canTelegram" :href="locRoute('telegram.index')">{{ t('nav.telegram') }}</ResponsiveNavLink>
                     <ResponsiveNavLink v-if="isAdmin" :href="locRoute('admin.tenants')">{{ t('nav.tenants') }}</ResponsiveNavLink>
+                    <ResponsiveNavLink :href="locRoute('about')">{{ t('nav.about') }}</ResponsiveNavLink>
                     <ResponsiveNavLink :href="locRoute('guide')">{{ t('nav.guide') }}</ResponsiveNavLink>
                 </div>
                 <div class="border-t border-line py-3">

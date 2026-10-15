@@ -74,6 +74,7 @@ class BookingService
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'timezone' => $tenant->timezone,
+                'locale' => app()->getLocale(),
                 'status' => Booking::STATUS_CONFIRMED,
                 'notes' => $notes,
             ]);

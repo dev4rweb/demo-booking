@@ -19,6 +19,8 @@ class StaffMember extends Model
         'user_id',
         'name',
         'is_active',
+        'telegram_chat_id',
+        'telegram_connect_token',
     ];
 
     protected function casts(): array

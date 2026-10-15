@@ -21,6 +21,11 @@ test('locale prefix switches language and rtl', function () {
         ->component('Guide')
         ->where('locale', 'fr')
     );
+
+    $this->get('/es/about')->assertOk()->assertInertia(fn ($page) => $page
+        ->component('About')
+        ->where('locale', 'es')
+    );
 });
 
 test('hidden russian is available by direct url', function () {

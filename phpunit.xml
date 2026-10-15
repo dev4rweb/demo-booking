@@ -35,6 +35,10 @@
         <env name="STRIPE_KEY" value=""/>
         <env name="STRIPE_SECRET" value=""/>
         <env name="TELEGRAM_BOT_TOKEN" value=""/>
+        <env name="TELEGRAM_BOT_USERNAME" value=""/>
+        <env name="TELEGRAM_WEBHOOK_SECRET" value=""/>
+        <env name="MAIL_FROM_ADDRESS" value="noreply@dev4rweb.com"/>
+        <env name="MAIL_FROM_NAME" value="Bookly"/>
         <env name="APP_URL" value="http://localhost"/>
     </php>
 </phpunit>

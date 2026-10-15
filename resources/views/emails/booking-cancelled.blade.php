@@ -1,10 +1,5 @@
-<x-mail::message>
-# Booking cancelled
-
-Hi {{ $booking->client->name }},
-
-Your appointment at **{{ $booking->tenant->name }}** on {{ $when }} has been cancelled.
-
-Thanks,<br>
-{{ $booking->tenant->name }}
-</x-mail::message>
+@component('emails.layout', ['title' => $title, 'locale' => $locale, 'dir' => $dir])
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">{{ $hello }}</p>
+    <p style="margin:0 0 20px;font-size:16px;line-height:1.6;">{{ $body }}</p>
+    <p style="margin:0;font-size:15px;line-height:1.6;">{{ $thanks }}<br>{{ $business }}</p>
+@endcomponent
