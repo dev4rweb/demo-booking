@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root,
+    html.light {
+        --canvas: 247 244 239;
+        --surface: 255 255 255;
+        --surface-2: 244 239 232;
+        --ink: 26 29 35;
+        --muted: 82 88 99;
+        --accent: 148 98 28;
+        --accent-fg: 255 255 255;
+        --line: 220 213 202;
+        --good: 21 115 71;
+        --warn: 168 85 12;
+        --danger: 176 32 32;
+        --glow: 148 98 28;
+    }
+
+    html.dark {
+        --canvas: 10 12 16;
+        --surface: 18 21 28;
+        --surface-2: 24 29 38;
+        --ink: 241 239 234;
+        --muted: 168 176 188;
+        --accent: 232 192 122;
+        --accent-fg: 18 14 8;
+        --line: 42 50 64;
+        --good: 134 239 172;
+        --warn: 251 191 36;
+        --danger: 252 165 165;
+        --glow: 232 192 122;
+    }
+
+    html {
+        color-scheme: dark;
+    }
+
+    html.light {
+        color-scheme: light;
+    }
+
+    body {
+        @apply min-h-screen bg-canvas text-ink antialiased;
+        background-image:
+            radial-gradient(1200px 500px at 10% -10%, rgb(var(--glow) / 0.08), transparent 55%),
+            radial-gradient(800px 400px at 100% 0%, rgb(var(--glow) / 0.05), transparent 50%);
+    }
+}
+
+@layer components {
+    .surface-card {
+        @apply rounded-2xl border border-line bg-surface shadow-card;
+    }
+
+    .soft-ring {
+        @apply transition duration-200 ease-out;
+    }
+
+    .soft-ring:hover {
+        box-shadow: 0 0 0 1px rgb(var(--accent) / 0.28), 0 16px 40px -20px rgb(var(--glow) / 0.45);
+    }
+}
