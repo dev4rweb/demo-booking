@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
+use App\Services\TelegramLinkService;
 use App\Services\TelegramService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TelegramWebhookController extends Controller
 {
-    public function handle(Request $request, TelegramService $telegram): JsonResponse
+    public function handle(Request $request, TelegramService $telegram, TelegramLinkService $links): JsonResponse
     {
         $secret = (string) config('services.telegram.webhook_secret');
         if ($secret !== '') {
@@ -23,27 +23,27 @@ class TelegramWebhookController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        $token = trim(substr($text, 6));
+        $token = trim(substr($text, strlen('/start')));
         if ($token === '') {
-            $telegram->sendMessage((string) $chatId, 'Send /start YOUR_TOKEN from the Bookly dashboard to connect this chat.');
+            $telegram->sendMessage((string) $chatId, __('app.telegram.bot_hello'));
 
             return response()->json(['ok' => true]);
         }
 
-        $tenant = Tenant::query()->where('telegram_connect_token', $token)->first();
+        $target = $links->connectChat($token);
 
-        if (! $tenant) {
-            $telegram->sendMessage((string) $chatId, 'Unknown connect token.');
+        if (! $target) {
+            $telegram->sendMessage((string) $chatId, __('app.telegram.bot_unknown'));
 
             return response()->json(['ok' => true]);
         }
 
-        $tenant->update([
+        $target->update([
             'telegram_chat_id' => (string) $chatId,
             'telegram_connect_token' => null,
         ]);
 
-        $telegram->sendMessage((string) $chatId, "Connected to {$tenant->name}. You will receive booking alerts here.");
+        $telegram->sendMessage((string) $chatId, __('app.telegram.bot_connected', ['name' => $target->name]));
 
         return response()->json(['ok' => true]);
     }

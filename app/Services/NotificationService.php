@@ -10,26 +10,23 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
-    public function __construct(private TelegramService $telegram) {}
+    public function __construct(
+        private TelegramService $telegram,
+        private TelegramLinkService $links,
+    ) {}
 
     public function bookingCreated(Booking $booking): void
     {
         Mail::to($booking->client->email)->queue(new BookingConfirmedMail($booking));
 
-        $this->notifyOwner(
-            $booking,
-            "New booking: {$booking->client->name} — {$booking->service->name} with {$booking->staffMember->name} at ".$booking->starts_at->timezone($booking->timezone)->format('Y-m-d H:i')
-        );
+        $this->notifyLinkedChats($booking, 'app.telegram.notify_new');
     }
 
     public function bookingCancelled(Booking $booking): void
     {
         Mail::to($booking->client->email)->queue(new BookingCancelledMail($booking));
 
-        $this->notifyOwner(
-            $booking,
-            "Cancelled booking: {$booking->client->name} — {$booking->service->name} at ".$booking->starts_at->timezone($booking->timezone)->format('Y-m-d H:i')
-        );
+        $this->notifyLinkedChats($booking, 'app.telegram.notify_cancelled');
     }
 
     public function bookingReminder(Booking $booking): void
@@ -37,14 +34,19 @@ class NotificationService
         Mail::to($booking->client->email)->queue(new BookingReminderMail($booking));
     }
 
-    private function notifyOwner(Booking $booking, string $text): void
+    private function notifyLinkedChats(Booking $booking, string $key): void
     {
-        $chatId = $booking->tenant->telegram_chat_id;
+        $locale = $booking->locale ?: 'en';
+        $when = $booking->starts_at->timezone($booking->timezone)->format('Y-m-d H:i');
+        $text = trans($key, [
+            'client' => $booking->client->name,
+            'service' => $booking->service->name,
+            'staff' => $booking->staffMember->name,
+            'when' => $when,
+        ], $locale);
 
-        if (! $chatId) {
-            return;
+        foreach ($this->links->chatsFor($booking) as $chatId) {
+            $this->telegram->sendMessage($chatId, $text);
         }
-
-        $this->telegram->sendMessage($chatId, $text);
     }
 }

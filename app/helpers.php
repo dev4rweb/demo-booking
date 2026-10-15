@@ -37,6 +37,15 @@ if (! function_exists('telegram_enabled')) {
     }
 }
 
+if (! function_exists('telegram_connect_ready')) {
+    function telegram_connect_ready(): bool
+    {
+        $username = ltrim((string) config('services.telegram.bot_username'), '@');
+
+        return telegram_enabled() && $username !== '' && $username !== 'your_bot_username';
+    }
+}
+
 if (! function_exists('page_seo')) {
     /**
      * Per-page title and description for <title>, meta, Open Graph and Twitter.

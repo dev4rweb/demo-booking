@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ResolvesTenant;
+use App\Models\StaffMember;
+use App\Models\Tenant;
+use App\Services\TelegramLinkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,42 +15,56 @@ class TelegramSettingsController extends Controller
 {
     use ResolvesTenant;
 
-    public function index(Request $request): Response
+    public function index(Request $request, TelegramLinkService $links): Response
     {
-        $tenant = $this->currentTenant($request);
-        abort_unless($request->user()?->isOwnerOf($tenant), 403);
+        [$target, $scope] = $this->target($request);
+        $token = $links->ensureToken($target);
 
         return Inertia::render('Settings/Telegram', [
-            'connected' => (bool) $tenant->telegram_chat_id,
-            'chatId' => $tenant->telegram_chat_id,
-            'connectToken' => $tenant->telegram_connect_token,
-            'botUsername' => config('services.telegram.bot_username'),
-            'enabled' => telegram_enabled(),
+            'connected' => (bool) $target->telegram_chat_id,
+            'deepLink' => $links->deepLink($token),
+            'enabled' => telegram_connect_ready(),
+            'scope' => $scope,
         ]);
     }
 
-    public function connect(Request $request): RedirectResponse
+    public function connect(Request $request, TelegramLinkService $links): RedirectResponse
     {
-        $tenant = $this->currentTenant($request);
-        abort_unless($request->user()?->isOwnerOf($tenant), 403);
+        [$target] = $this->target($request);
 
-        $tenant->update([
-            'telegram_connect_token' => Str::lower(Str::random(24)),
-        ]);
+        $target->update(['telegram_connect_token' => null]);
+        $token = $links->ensureToken($target->fresh());
 
-        return back()->with('success', __('app.telegram.token_ready'));
+        return back()->with('telegram_deep_link', $links->deepLink($token));
     }
 
     public function disconnect(Request $request): RedirectResponse
     {
-        $tenant = $this->currentTenant($request);
-        abort_unless($request->user()?->isOwnerOf($tenant), 403);
+        [$target] = $this->target($request);
 
-        $tenant->update([
+        $target->update([
             'telegram_chat_id' => null,
             'telegram_connect_token' => null,
         ]);
 
         return back()->with('success', __('app.common.saved'));
+    }
+
+    /**
+     * @return array{0: Tenant|StaffMember, 1: string}
+     */
+    private function target(Request $request): array
+    {
+        $tenant = $this->currentTenant($request);
+        $user = $request->user();
+
+        if ($user?->isOwnerOf($tenant)) {
+            return [$tenant, 'business'];
+        }
+
+        $staff = $tenant->staffMembers()->where('user_id', $user?->id)->first();
+        abort_unless($staff, 403);
+
+        return [$staff, 'staff'];
     }
 }

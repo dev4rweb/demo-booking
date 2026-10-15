@@ -29,6 +29,7 @@ class Booking extends Model
         'starts_at',
         'ends_at',
         'timezone',
+        'locale',
         'status',
         'manage_token',
         'cancelled_at',
