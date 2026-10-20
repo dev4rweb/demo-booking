@@ -6,6 +6,7 @@ use App\Services\TelegramLinkService;
 use App\Services\TelegramService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class TelegramWebhookController extends Controller
 {
@@ -23,9 +24,26 @@ class TelegramWebhookController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        $token = trim(substr($text, strlen('/start')));
+        App::setLocale(telegram_locale(data_get($request->all(), 'message.from.language_code')));
+
+        $token = $this->startPayload($text);
         if ($token === '') {
-            $telegram->sendMessage((string) $chatId, __('app.telegram.bot_hello'));
+            $telegram->sendMessage(
+                (string) $chatId,
+                __('app.telegram.bot_welcome', ['connect' => __('app.telegram.connect')]),
+                [
+                    'inline_keyboard' => [[
+                        [
+                            'text' => __('app.telegram.bot_open_demo'),
+                            'url' => 'https://demo-booking.dev4rweb.com',
+                        ],
+                        [
+                            'text' => __('app.telegram.bot_open_site'),
+                            'url' => 'https://dev4rweb.com',
+                        ],
+                    ]],
+                ],
+            );
 
             return response()->json(['ok' => true]);
         }
@@ -46,5 +64,16 @@ class TelegramWebhookController extends Controller
         $telegram->sendMessage((string) $chatId, __('app.telegram.bot_connected', ['name' => $target->name]));
 
         return response()->json(['ok' => true]);
+    }
+
+    private function startPayload(string $text): string
+    {
+        $token = trim(substr($text, strlen('/start')));
+
+        if (str_starts_with($token, '@')) {
+            $token = trim((string) preg_replace('/^@\S+/', '', $token));
+        }
+
+        return $token;
     }
 }

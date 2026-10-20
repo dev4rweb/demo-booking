@@ -67,6 +67,92 @@ test('webhook rejects a wrong secret', function () {
     ])->assertUnauthorized();
 });
 
+test('plain start replies with a welcome and demo links', function () {
+    enableTelegramBot();
+    Http::fake(['https://api.telegram.org/*' => Http::response(['ok' => true])]);
+
+    $this->postJson('/telegram/webhook', [
+        'message' => [
+            'text' => '/start',
+            'chat' => ['id' => 4242],
+            'from' => ['language_code' => 'en'],
+        ],
+    ], [
+        'X-Telegram-Bot-Api-Secret-Token' => 'hook-secret',
+    ])->assertOk();
+
+    Http::assertSent(function ($request) {
+        $markup = json_decode((string) $request['reply_markup'], true);
+
+        return str_contains($request->url(), 'sendMessage')
+            && (string) $request['chat_id'] === '4242'
+            && str_contains((string) $request['text'], 'demo online booking service')
+            && str_contains((string) $request['text'], 'Connect Telegram')
+            && str_contains((string) $request['text'], 'confirmations and reminders')
+            && ($markup['inline_keyboard'][0][0] ?? null) === [
+                'text' => 'Open demo',
+                'url' => 'https://demo-booking.dev4rweb.com',
+            ]
+            && ($markup['inline_keyboard'][0][1] ?? null) === [
+                'text' => 'dev4rweb.com',
+                'url' => 'https://dev4rweb.com',
+            ];
+    });
+});
+
+test('plain start with a bot mention still sends the welcome', function () {
+    enableTelegramBot();
+    Http::fake(['https://api.telegram.org/*' => Http::response(['ok' => true])]);
+
+    $this->postJson('/telegram/webhook', [
+        'message' => [
+            'text' => '/start@dev4rweb_bookly_bot',
+            'chat' => ['id' => 11],
+        ],
+    ], [
+        'X-Telegram-Bot-Api-Secret-Token' => 'hook-secret',
+    ])->assertOk();
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'sendMessage')
+        && str_contains((string) $request['text'], 'demo online booking service')
+        && isset($request['reply_markup']));
+});
+
+test('plain start localizes the welcome from telegram language_code', function (string $code, string $needle) {
+    enableTelegramBot();
+    Http::fake(['https://api.telegram.org/*' => Http::response(['ok' => true])]);
+
+    $payload = [
+        'message' => [
+            'text' => '/start',
+            'chat' => ['id' => 7],
+        ],
+    ];
+
+    if ($code !== '') {
+        $payload['message']['from'] = ['language_code' => $code];
+    }
+
+    $this->postJson('/telegram/webhook', $payload, [
+        'X-Telegram-Bot-Api-Secret-Token' => 'hook-secret',
+    ])->assertOk();
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'sendMessage')
+        && str_contains((string) $request['text'], $needle));
+})->with([
+    ['en', 'demo online booking service'],
+    ['zh', '在线预约演示服务'],
+    ['zh-hans', '在线预约演示服务'],
+    ['fr', 'démo de réservation en ligne'],
+    ['es', 'demo de reservas en línea'],
+    ['ar', 'خدمة تجريبية للحجز'],
+    ['pt', 'serviço demo de reservas'],
+    ['pt-BR', 'serviço demo de reservas'],
+    ['ru', 'демо-сервис онлайн-записи'],
+    ['de', 'demo online booking service'],
+    ['', 'demo online booking service'],
+]);
+
 test('webhook links a one-time code to the business chat', function () {
     enableTelegramBot();
     Http::fake(['https://api.telegram.org/*' => Http::response(['ok' => true])]);
@@ -86,6 +172,10 @@ test('webhook links a one-time code to the business chat', function () {
     $studio['tenant']->refresh();
     expect($studio['tenant']->telegram_chat_id)->toBe('991122')
         ->and($studio['tenant']->telegram_connect_token)->toBeNull();
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'sendMessage')
+        && str_contains((string) $request['text'], 'Connected to')
+        && ! isset($request['reply_markup']));
 });
 
 test('webhook links a one-time code to a staff member', function () {

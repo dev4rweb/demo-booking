@@ -46,6 +46,22 @@ if (! function_exists('telegram_connect_ready')) {
     }
 }
 
+if (! function_exists('telegram_locale')) {
+    function telegram_locale(mixed $languageCode): string
+    {
+        $supported = config('localization.supported', ['en']);
+        $default = config('localization.default', 'en');
+
+        if (! is_string($languageCode) || $languageCode === '') {
+            return $default;
+        }
+
+        $base = strtolower(substr(str_replace('_', '-', $languageCode), 0, 2));
+
+        return in_array($base, $supported, true) ? $base : $default;
+    }
+}
+
 if (! function_exists('page_seo')) {
     /**
      * Per-page title and description for <title>, meta, Open Graph and Twitter.

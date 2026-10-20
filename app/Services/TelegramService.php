@@ -12,7 +12,10 @@ class TelegramService
         return telegram_enabled();
     }
 
-    public function sendMessage(string $chatId, string $text): ?array
+    /**
+     * @param  array<string, mixed>|null  $replyMarkup
+     */
+    public function sendMessage(string $chatId, string $text, ?array $replyMarkup = null): ?array
     {
         if (! $this->enabled()) {
             Log::info('Telegram skipped (no bot token)', ['chat_id' => $chatId, 'text' => $text]);
@@ -22,12 +25,18 @@ class TelegramService
 
         $token = (string) config('services.telegram.bot_token');
 
+        $payload = [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+        ];
+
+        if ($replyMarkup !== null) {
+            $payload['reply_markup'] = json_encode($replyMarkup, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
         try {
-            $response = Http::post("https://api.telegram.org/bot{$token}/sendMessage", [
-                'chat_id' => $chatId,
-                'text' => $text,
-                'parse_mode' => 'HTML',
-            ]);
+            $response = Http::post("https://api.telegram.org/bot{$token}/sendMessage", $payload);
 
             if ($response->successful()) {
                 return $response->json();
